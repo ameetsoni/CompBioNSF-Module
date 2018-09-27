@@ -1,6 +1,7 @@
 import numpy as np
 from sklearn.model_selection import StratifiedKFold, GridSearchCV
 from sklearn.metrics import roc_auc_score
+from sklearn import preprocessing
 
 def runTuneTest(learner, parameters, X, y):
     """
@@ -52,7 +53,10 @@ def loadGeneExpression(filename, delim=","):
     Returns: 2D numpy array of size (numProfiles, numGenes)
     """
 
-    return np.genfromtxt(filename,delimiter=delim)
+    rawdata = np.genfromtxt(filename,delimiter=delim)
+    scaled = preprocessing.normalize(rawdata, norm='l2', axis=0)
+    return scaled
+
 
 def loadGeneNames(filename):
     """

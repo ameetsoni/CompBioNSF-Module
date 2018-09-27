@@ -10,30 +10,30 @@ Download this repository by either cloning the repo using git or by downloading 
 There are two Python files of interest in the [`src`](src/) folder:
 
   * [`geneMLLib.py`](src/geneMLLib.py) - this contains provided libraries.  If you are a novice, you can safely ignore this file and follow the documentation to use the provided functionality.  If you are familiar with Python and various libraries (numpy, scikit-learn, etc.) feel free to peruse the code to see how the data is processed.
-  * [`predictCancer.py`](src/predictCancer.py) - the main program you will implement following the instructions below
+  * [`predictCancer.py`](src/predictCancer.py) - the main program for building a supervised prediction algorithm for predicting colon cancer. You will implement this following the instructions below
+  * [`clusterGenes.py`](src/clusterGenes.py) - the main program for building an unsupervised clustering algorithm for grouping genes. You will implement this following the instructions below
 
 
 ## Data
 
-We will develop using the [colon cancer](data/colonCancer) data set, detailed in the seminal paper [Broad patterns of gene expression revealed by clustering analysis of tumor and normal colon tissues probed by oligonucleotide arrays](https://www.ncbi.nlm.nih.gov/pubmed/10359783) from Alon et al.  You can find the relevant files in your [`data`](data).  The original files are also [publicy available](http://genomics-pubs.princeton.edu/oncology/affydata/index.html).
+You can find the relevant files in your [`data`](data).  
+For prediction , we will use the [colon cancer](data/colonCancer) data set, detailed in the seminal paper [Broad patterns of gene expression revealed by clustering analysis of tumor and normal colon tissues probed by oligonucleotide arrays](https://www.ncbi.nlm.nih.gov/pubmed/10359783) by Alon et al.  For gene clustering, we will use a subset of the [yeast](data/sampleYeast) expression data set from the paper [Cluster analysis and display of genome-wide expression patterns](http://www.pnas.org/content/95/25/14863.full) by Eisen et al.
 
-There are three files made available:
- * `expression.csv` - the gene expression data from 2000 genes for 62 patients.  This file has already been processed, as detailed in the original paper. Rows correspond to patients and columns correspond to genes.
- * `names.txt` - the names of the genes in the expression data set.  The names file is in order according to the columns of `expression.csv` (e.g., column 1 in the expression data is the gene in row 1 of the names file).
+In each data directory, there are three files made available:
+ * `expression.csv` - the gene expression data, where rows are profiles and columns are measurements.  For the cancer data set, each column represents a gene and each row represents a patient.  For the yeast data set, each column is an experiment and each row is a gene profile.  These files have already been processed, as detailed in the original paper. Rows correspond to patients and columns correspond to genes.
+ * `names.txt` - the names of the genes in the expression data set.  The names file is in order according to the columns of `expression.csv` (e.g., column 1 in the expression data is the gene in row 1 of the names file) for colon cancer, but corresponds to the rows in the yeast data set.
+ * `DATA.md `- information on how the data set was generated.
+
+ In addition, for the colon cancer data set, we have:
  * `ids.txt` - identifies normal vs cancerous tissues (i.e., the labels) from the samples provided in `expressions.txt`.  The rows correspond, with a negative value indicating cancerous tissue and positive values indicating normal tissue.  The magnitude of the value is not relevant for our application.
 
-## Implementation
+## Part 1: Cancer Prediction Implementation
 
 In the provided data, the gene expressions was measured for tissue samples from 62 patients.  40 of the samples were identified as positive for colon cancer and 22 were negative (normal tissue).  One common method for analyzing gene expression data is to perform classification to learn differences in the expression patterns of samples from different categories (cancerous vs normal).  We will utilize [Scikit-Learn](http://scikit-learn.org/), a Python library for accessible, yet efficient data mining.
 
 ### Getting started
 
-Clone or download the repo and start in the main directory.
 
-```bash
-$ git clone https://github.com/ameetsoni/CompBioNSF-Module.git
-$ cd CompBioNSF-Module/
-```
 
 Move into the `src` directory and open the main program with your favorite editor e.g.,
 
