@@ -3,7 +3,18 @@ Code for module presented at Carleton College, September 29, 2018
 
 ## Setup
 
-Download this repository by either cloning the repo using git or by downloading a zip version and unpackaging the contents.  
+Download this repository by either cloning the repo using git or by downloading a zip version and unpackaging the contents.  You may need to install the following libraries:
+ * Numpy
+ * Scikit-Learn (sklearn)
+ * SciPy
+ 
+This can be done using `pip`:
+
+```bash
+pip install numpy
+pip install sklearn
+pip install scipy
+```
 
 ## Files
 
