@@ -49,7 +49,7 @@ Move into the `src` directory and open the main program with your favorite edito
 
 ```bash
 $ cd src
-$ atom predictCancer.py
+$ vim predictCancer.py
 ```
 
 We will start our implementation of the `main()` function.
@@ -109,8 +109,66 @@ testScore = clf.score(X_test, y_test)
 print("Accuracy on held-aside test data: %.3f" % testScore)
 ```
 
-## Extensions
+### Extensions
 
 * tuning parameters
 * using n-fold cross validation
 * interpreting models
+
+
+## Part 2: Clustering Gene Expression
+
+We will use the data provided in [data/sample-yeast](data/sample-yeast).  Each gene in our data set has over 70 measurements from different samples forming a gene profile.  The experimental conditions (e.g., point-in-time, individual, etc. ) are the same within one column by vary between columns.  
+
+#### Getting started
+
+If not there already, move into the `src` directory and open the file `clusterGenes.py`:
+
+```bash
+$ cd src
+$ vim clusterGenes.py
+```
+
+#### Load the Data
+
+As before, you can use the functions defined in `geneMLLib.py` to handle processing the files.  In this situation, though, we don't have supervised labels, only the names of the genes on each line.  So we will only load our data set (`expressions.csv`) and the gene names (`names.txt)`);
+
+```python
+dir = "../data/sample-yeast/"
+X = ml.loadGeneExpression(dir+'expression.csv')
+geneNames = ml.loadGeneNames(dir+'names.txt')
+```
+
+As before, the first line defines the directory for our data, the second line loads in our expression data into a two-dimensional array, and the last is an array of gene names, with entry `i` corresponding to the `i`th row of `X`.
+
+#### Train a cluster model
+
+Now that we have our gene expression data, we will cluster the genes based on their expression profiles (the names will not be used in the clustering, but rather only for evaluation).  We will use the [K-means clustering algorithm](https://en.wikipedia.org/wiki/K-means_clustering), which is available in [scikit-learn](http://scikit-learn.org/stable/modules/generated/sklearn.cluster.KMeans.html#sklearn.cluster.KMeans).  You can explore [other clustering](http://scikit-learn.org/stable/modules/clustering.html) algorithms implemented in scikit-learn.
+
+```python
+k=5 #number of clusters
+model = KMeans(n_clusters=k)
+model.fit(X)
+```
+
+The above specifies that we will construct a model using k-means.  We initialize the model with 5 cluster centers, but this choice can be changed.  See the scikit-learn [documentation]((http://scikit-learn.org/stable/modules/generated/sklearn.cluster.KMeans.html#sklearn.cluster.KMeans)) for other settings we can modify in the k-means algorithm.  The model is then fit to the data, giving us `k` cluster centers.  While we could display the cluster centers, it is probably more useful to see what genes belong to each cluster.
+
+#### Inspect the gene clusters
+
+We can use the predict function to identify the closest cluster center for each gene in our data set:
+
+```python
+clusterIndex = model.predict(X)
+```
+
+`clusterIndex` has one entry per row of `X`, with a value from `0` to `k-1`.  To print the genes in each cluster, you can run the following code:
+
+```python
+for i in range(k):
+    print("Cluster %d" % i)
+    for name in geneNames[clusterIndex == i]:
+        print("\t"+name)
+    print()
+```
+
+Note that the cluster ordering is random and does not have significance.  Also, if you rerun the algorithm you may get different results depending on where the cluster centers began.  View your results.  How did the clustering algorithm do 
