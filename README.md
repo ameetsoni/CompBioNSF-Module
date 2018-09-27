@@ -7,7 +7,7 @@ Download this repository by either cloning the repo using git or by downloading 
  * Numpy
  * Scikit-Learn (sklearn)
  * SciPy
- 
+
 This can be done using `pip`:
 
 ```bash
@@ -43,7 +43,6 @@ In each data directory, there are three files made available:
 In the provided data, the gene expressions was measured for tissue samples from 62 patients.  40 of the samples were identified as positive for colon cancer and 22 were negative (normal tissue).  One common method for analyzing gene expression data is to perform classification to learn differences in the expression patterns of samples from different categories (cancerous vs normal).  We will utilize [Scikit-Learn](http://scikit-learn.org/), a Python library for accessible, yet efficient data mining.
 
 ### Getting started
-
 
 
 Move into the `src` directory and open the main program with your favorite editor e.g.,
