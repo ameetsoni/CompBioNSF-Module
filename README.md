@@ -52,6 +52,7 @@ $ cd src
 $ vim clusterGenes.py
 ```
 
+#### Load the Data
 
 We need to load all of our data into the program so that we can use it to train and test our models.  I have written functions in the `geneMLLib.py` that will handle the parsing of files for you.  If you are curious, feel free to inspect that given code.
 
