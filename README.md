@@ -147,6 +147,7 @@ This creates a training set that will be used to build the model, and a test set
 ### Train a model
 
 Now that we have data, we will train a classifier.  We will use [Logistic Regression](http://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LogisticRegression.html), a simple yet effective model.  You can free free to experiment with different [supervised learning models](http://scikit-learn.org/stable/supervised_learning.html).
+
 ```python
 clf = LogisticRegression()
 clf.fit(X_train, y_train)
@@ -173,13 +174,104 @@ print("Accuracy on training data: %.3f" % trainScore)
 
 This will provide an over-confident estimate; of course our model should do well on the data set it was fitting to!  We would like to see if the model *generalizes* to unseen data.  Holding aside data simulates a real-world setting, where a diagnostic tool needs to be accurate on new patients.
 
-```
+```python
 testScore = clf.score(X_test, y_test)
 print("Accuracy on held-aside test data: %.3f" % testScore)
 ```
 
 ### Extensions
 
-* tuning parameters
-* using n-fold cross validation
-* interpreting models
+The above demonstration is only a portion of the full machine learning pipeline.  If you have time and want to explore machine learning in depth, consider these extensions.
+
+#### Parameter Tuning
+
+Almost every machine learning model has some set of parameters that affect the learned model.  For example, if you choose to use a neural network model, how many layers do you want?  How big is a layer?  How fast should the model learn?  How long it should it be trained?
+
+It is usually not self-evident what the best settings are, though there exists plenty of literature on best practices.  Usually, the parameter presents a trade-off between competing needs - to a) learn as much as possible from the training data while b) not *overlearning* to those specific examples (aka overfitting).  Recall, our goal is *generalization error* - we want to minimize future error, which is not the same as current error.
+
+For logistic regression, there are a few parameters that you can find in the [documentation](http://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LogisticRegression.html#sklearn.linear_model.LogisticRegression).  One important parameter is how to penalize the weights (if it all) and how to balance the weight penalty vs the penalty for being inaccurate on the training data .  A weight penalty discourages high weights (usually a sign that the model is trying to hard to learn specific examples) but also increases the error rate.  The default penalty in sci-kit learn is the [L2](https://en.wikipedia.org/wiki/L2_norm) norm and the weight to this penalty is the *complexity* parameter (**C**).  Higher values of C favor reducing the error rate and allowing larger weights, while lower weights *regularize* the model to avoid too much variance.
+
+Instead of arbitrarily picking C, we can try out different values of C.  To do so, we can establish the set of parameter settings to consider:
+
+```python
+parameters = {"C": [.1, 1, 10, 100]}
+```
+
+Then, we use the grid-search feature to have scikit-learn try out each setting and pick the best one:
+
+```python
+tune_clf = GridSearchCV(clf, parameters, cv=3)
+//This is code you had from before to train/test
+trainScore = tune_clf.score(X_train, y_train)
+print("Accuracy on training data: %.3f" % trainScore)
+testScore = tune_clf.score(X_test, y_test)
+print("Accuracy on held-aside test data: %.3f" % testScore)
+```
+Only the first line differs; the other lines were from before, but rather than fit the logistic regression classifier (`clf`), we fit and score a version of logistic regression with the best `C` parameter picked by `GridSearchCV`.  To understand the `cv` setting, read the next section.  This repeats the train/test process internally 3 times and picks the C with the best average error.
+
+To see the value of C the model picked, you can access the `best_params_` setting:
+
+```python
+print("The chosen C value: %d" % tune_clf.best_params_)
+```
+
+Experiment with multiple parameters and different algorithms.  One tip: if your model consistently chooses the lowest or highest parameter option, adjust your range.  Usually, we space in order of magnitude (e.g., 1, 10, 100, etc.) for numerical parameter settings.
+
+#### N-fold cross validation
+
+If you re-run your program multiple times, you'll notice that there is a lot of variance in your error rate.  This is due to the randomness involved in partitioning training/testing examples on small data sets.  By chance, you may get an extra easy example or two and that bumps your accuracy significantly.  This, however, is not a robust estimate of future error.  We can simulate having more data by dividing up the data set into train/test splits multiple times and then taking the average error across the different runs.  The most popular approach for this is known as [N-fold cross-validation](http://scikit-learn.org/stable/modules/cross_validation.html#cross-validation) where `N` is the number of repetitions.  
+
+Take a look in `geneMLLib.py` at the function `runTuneTest`.  This function does two of the extensions: it divides up the data set into `N=5` partitions.  For each, it treats 4 of the partitions as the training set and 1 as the test set:
+
+```python
+outer_cv = StratifiedKFold(n_splits=5, shuffle=True)
+outer_cv = outer_cv.split(X,y)
+for train, test in outer_cv:
+      X_train, X_test =  X[train], X[test]
+      y_train, y_test = y[train], y[test]
+      ...
+```
+
+The first two lines specify that we should divide the data up 5 times, and the for loop picks up the individual train/test splits that were created. The rest of the for loop which look familiar - it is also doing the tuning process from the previous section.  To use this function in your main code, modify your classifier call to be:
+
+```python
+parameters = {"C": [.1, 1, 10, 100]}
+scores, weights = ml.runTuneTest(clf, parameters, X, y)
+```
+
+and then print out the results from the different folds:
+
+```python
+print("%5s %10s" % ("Fold","AUC Score"))
+print("%5s %10s" % ("----","---------"))
+
+for fold in range(len(scores)):
+    print("%5d %10.3f" % (fold+1, scores[fold]))
+print("-"*16)
+print("%5s %10.3f" % ("Mean", np.mean(scores)))
+print()
+```
+
+#### Interpreting Models
+
+One important aspect of machine learning in computational biology is that nearly as important as accuracy is the *interpretation* of the models; biologists want to gain insight into the underlying biological phenomena that the algorithm picked up on.  The ability to interpret models varies; decision trees are a favorite in the medical community as they mimic human decision processes, while neural networks are non-linear with many parameters and thus very opaque.
+
+Sci-kit learns support for interpreting models is not uniform, so you will need to search for strategies related to your preferred model.  For algorithms that learn weights like logistic regression, we can extract the learned coefficients.  These are an array of values, which each value corresponding to the importance of that column in our data set.  So, if the gene in column `i` is very strongly correlated with colon cancer, the `i`th coefficient should be large.  We can use this to find which genes were most predictive of colon cancer.
+
+Note this is given to you as one of the results from `runTuneTest`; essentially, we just need to retrieve the classifiers coefficients which is a one-dimensional array of length numGenes:
+
+```python
+features.append(clf.best_estimator_.coef_)
+```
+
+I've written a function `getGeneRanks()` that takes these coefficients and sorts the gene names you loaded in earlier by importance:
+
+```python
+rankedGenes = ml.getGeneRanks(weights)
+print("Top 10 genes for predicting cancer tissue:")
+print("------------------------------------------")
+for index in rankedGenes[0:10]:
+    print(geneNames[index])
+```
+
+Read the original paper and see if your results match theirs.  You should see ribosomal proteins in your list, as supported in the biological literature.  
