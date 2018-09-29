@@ -1,11 +1,47 @@
 # CompBioNSF-Module
-Code for module presented at Carleton College, September 29, 2018
+This repository contains coding exercises and slides for the machine learning module presented at the NSF Undergraduate Computational Biology Woskshop at Carleton College on September 29, 2018.
 
 ## Setup
 
-Download this repository by either cloning the repo using git or by downloading a zip version and unpackaging the contents.  You may need to install the following libraries:
- * Numpy
- * Scikit-Learn (sklearn)
+Download this repository by either cloning the repo using git or by downloading a zip version and unpackaging the contents.  Click on the "Clone or Download" button in the upper-right corner.  
+
+If you are not familiar with git there are two ways to try to download the repo:
+
+1. Open your command line terminal.  Navigate to a location where you want to put the files.
+
+2. Clone the repository by copying and pasting the code below:
+
+```bash
+git clone https://github.com/ameetsoni/CompBioNSF-Module.git
+```
+
+3. Then move into the repository:
+
+```bash
+$ cd CompBioNSF-Module
+$ ls
+LICENSE		data		soln
+README.md	slides	src
+```
+
+Alternatively, you can download the files directly without git tools:
+
+1. Click "Clone or Download" above.
+
+2. Select "Download ZIP" and save to a location where you can find and use the files.
+
+3. Unzip the file (most operating systems will do this automatically when you try to open the zip file). On the command line:
+
+```bash
+$ unzip master.zip
+$ cd master
+```
+
+
+
+You may need to install the following libraries:
+ * Numpy (handy [cheatsheet](https://s3.amazonaws.com/assets.datacamp.com/blog_assets/Numpy_Python_Cheat_Sheet.pdf))
+ * Scikit-Learn (sklearn) (handy [cheatsheet](https://s3.amazonaws.com/assets.datacamp.com/blog_assets/Scikit_Learn_Cheat_Sheet_Python.pdf))
  * SciPy
 
 This can be done using `pip`:
@@ -18,20 +54,19 @@ pip install scipy
 
 ## Files
 
-There are two Python files of interest in the [`src`](src/) folder:
+There are three Python files of interest in the [`src`](src/) folder:
 
   * [`geneMLLib.py`](src/geneMLLib.py) - this contains provided libraries.  If you are a novice, you can safely ignore this file and follow the documentation to use the provided functionality.  If you are familiar with Python and various libraries (numpy, scikit-learn, etc.) feel free to peruse the code to see how the data is processed.
-  * [`predictCancer.py`](src/predictCancer.py) - the main program for building a supervised prediction algorithm for predicting colon cancer. You will implement this following the instructions below
-  * [`clusterGenes.py`](src/clusterGenes.py) - the main program for building an unsupervised clustering algorithm for grouping genes. You will implement this following the instructions below
+  * [`predictCancer.py`](src/predictCancer.py) - the main program for building a supervised prediction algorithm for predicting colon cancer. You will implement this following the instructions below.
+  * [`clusterGenes.py`](src/clusterGenes.py) - the main program for building an unsupervised clustering algorithm for grouping genes. You will implement this following the instructions below.
 
 
 ## Data
 
-You can find the relevant files in your [`data`](data).  
-For prediction , we will use the [colon cancer](data/colonCancer) data set, detailed in the seminal paper [Broad patterns of gene expression revealed by clustering analysis of tumor and normal colon tissues probed by oligonucleotide arrays](https://www.ncbi.nlm.nih.gov/pubmed/10359783) by Alon et al.  For gene clustering, we will use a subset of the [yeast](data/sampleYeast) expression data set from the paper [Cluster analysis and display of genome-wide expression patterns](http://www.pnas.org/content/95/25/14863.full) by Eisen et al.
+You can find the relevant files in your [`data`](data).  For prediction , we will use the [colon cancer](data/colonCancer) data set, detailed in the seminal paper [Broad patterns of gene expression revealed by clustering analysis of tumor and normal colon tissues probed by oligonucleotide arrays](https://www.ncbi.nlm.nih.gov/pubmed/10359783) by Alon et al.  For gene clustering, we will use a subset of the [yeast](data/sampleYeast) expression data set from the paper [Cluster analysis and display of genome-wide expression patterns](http://www.pnas.org/content/95/25/14863.full) by Eisen et al.
 
-In each data directory, there are three files made available:
- * `expression.csv` - the gene expression data, where rows are profiles and columns are measurements.  For the cancer data set, each column represents a gene and each row represents a patient.  For the yeast data set, each column is an experiment and each row is a gene profile.  These files have already been processed, as detailed in the original paper. Rows correspond to patients and columns correspond to genes.
+In each data directory, there are three files of interest:
+ * `expression.csv` - the gene expression data, where rows are profiles and columns are measurements.  For the cancer data set, each column represents a gene and each row represents a patient.  For the yeast data set, each column is an experiment and each row is a gene profile.  These files have already been processed, as detailed in the original papers.
  * `names.txt` - the names of the genes in the expression data set.  The names file is in order according to the columns of `expression.csv` (e.g., column 1 in the expression data is the gene in row 1 of the names file) for colon cancer, but corresponds to the rows in the yeast data set.
  * `DATA.md `- information on how the data set was generated.
 
@@ -39,9 +74,9 @@ In each data directory, there are three files made available:
  * `ids.txt` - identifies normal vs cancerous tissues (i.e., the labels) from the samples provided in `expressions.txt`.  The rows correspond, with a negative value indicating cancerous tissue and positive values indicating normal tissue.  The magnitude of the value is not relevant for our application.
 
 
-## Part 2: Clustering Gene Expression
+## Part 1: Clustering Gene Expression
 
-We will use the data provided in [data/sample-yeast](data/sample-yeast).  Each gene in our data set has over 70 measurements from different samples forming a gene profile.  The experimental conditions (e.g., point-in-time, individual, etc. ) are the same within one column by vary between columns.  
+We will use the data provided in [data/sample-yeast](data/sample-yeast).  Each gene in our data set has over 70 measurements from different samples forming a gene profile.  The experimental conditions (e.g., point-in-time, individual, etc. ) are the same within one column,  but the conditions change between columns (e.g., stage in mitosis).  
 
 #### Getting started
 
@@ -52,9 +87,17 @@ $ cd src
 $ vim clusterGenes.py
 ```
 
+To run your program:
+
+```python
+$ python3 clusterGenes.py
+```
+
+This module was tested in Python 3, but should work for Python 2.
+
 #### Load the Data
 
-We need to load all of our data into the program so that we can use it to train and test our models.  I have written functions in the `geneMLLib.py` that will handle the parsing of files for you.  If you are curious, feel free to inspect that given code.
+We need to load all of our data into the program so that we can use it to train and test our models.  I have written functions in the `geneMLLib.py` that will handle the parsing of files for you.  If you are curious, feel free to inspect that given code.  Put these lines at the top of your `main()` function.
 
 ```python
 dir = "../data/sample-yeast/"
@@ -109,10 +152,9 @@ How does [DBSCAN (Density-based Spatial Clustering of Applications of Noise)](ht
 
 ## Part 2: Cancer Prediction Implementation
 
-In the provided data, the gene expressions was measured for tissue samples from 62 patients.  40 of the samples were identified as positive for colon cancer and 22 were negative (normal tissue).  One common method for analyzing gene expression data is to perform classification to learn differences in the expression patterns of samples from different categories (cancerous vs normal).  We will utilize [Scikit-Learn](http://scikit-learn.org/), a Python library for accessible, yet efficient data mining.
+In the provided data, the gene expressions was measured for tissue samples from 62 patients.  40 of the samples were identified as positive for colon cancer and 22 were negative (normal tissue).  One common method for analyzing gene expression data is to perform classification to learn differences in the expression patterns of samples from different categories (cancerous vs normal).  We will utilize [Scikit-Learn](http://scikit-learn.org/).
 
 ### Getting started
-
 
 Move into the `src` directory and open the main program with your favorite editor e.g.,
 
@@ -146,7 +188,7 @@ This creates a training set that will be used to build the model, and a test set
 
 ### Train a model
 
-Now that we have data, we will train a classifier.  We will use [Logistic Regression](http://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LogisticRegression.html), a simple yet effective model.  You can free free to experiment with different [supervised learning models](http://scikit-learn.org/stable/supervised_learning.html).
+Now that we have data, we will train a classifier.  We will use [Logistic Regression](http://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LogisticRegression.html), a simple yet effective model.  You can feel free to experiment with different [supervised learning models](http://scikit-learn.org/stable/supervised_learning.html).
 
 ```python
 clf = LogisticRegression()
@@ -165,7 +207,7 @@ The `fit()` function trains the model based on your settings for the classifier.
 
 ### Evaluate the model
 
-To see how well the model does, we could see well it does on the training data:
+To see how well the model does, we could see how well it does on the training data:
 
 ```python
 trainScore = clf.score(X_train, y_train)
@@ -179,6 +221,15 @@ testScore = clf.score(X_test, y_test)
 print("Accuracy on held-aside test data: %.3f" % testScore)
 ```
 
+Logistic regression is a probabilistic model, meaning it models the probability that a specific example is positive or negative.  To see the confidence in patient estimates, you can use the `predict_proba` function:
+
+```python
+clf.predict_proba(X_test)
+```
+
+Compare the predicted probabilities of the training examples and test examples to see if you can spot "overconfidence" in the learned model.  
+
+
 ### Extensions
 
 The above demonstration is only a portion of the full machine learning pipeline.  If you have time and want to explore machine learning in depth, consider these extensions.
@@ -187,9 +238,9 @@ The above demonstration is only a portion of the full machine learning pipeline.
 
 Almost every machine learning model has some set of parameters that affect the learned model.  For example, if you choose to use a neural network model, how many layers do you want?  How big is a layer?  How fast should the model learn?  How long it should it be trained?
 
-It is usually not self-evident what the best settings are, though there exists plenty of literature on best practices.  Usually, the parameter presents a trade-off between competing needs - to a) learn as much as possible from the training data while b) not *overlearning* to those specific examples (aka overfitting).  Recall, our goal is *generalization error* - we want to minimize future error, which is not the same as current error.
+It is usually not self-evident what the best settings are, though there exists plenty of literature on best practices.  Usually, the parameter presents a trade-off between competing needs - to a) learn as much as possible from the training data while b) not *overlearning* to those specific examples (aka overfitting).  Recall, our goal is *generalization error* - we want to minimize future error, which is not the same as current error.  This is a very large area of theoretical research known as the [bias-variance dilemma](https://en.wikipedia.org/wiki/Bias-variance_dilemma) and is an essential aspect of understanding how to build quality machine learning pipelines.
 
-For logistic regression, there are a few parameters that you can find in the [documentation](http://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LogisticRegression.html#sklearn.linear_model.LogisticRegression).  One important parameter is how to penalize the weights (if it all) and how to balance the weight penalty vs the penalty for being inaccurate on the training data .  A weight penalty discourages high weights (usually a sign that the model is trying to hard to learn specific examples) but also increases the error rate.  The default penalty in sci-kit learn is the [L2](https://en.wikipedia.org/wiki/L2_norm) norm and the weight to this penalty is the *complexity* parameter (**C**).  Higher values of C favor reducing the error rate and allowing larger weights, while lower weights *regularize* the model to avoid too much variance.
+For logistic regression, there are a few parameters that you can find in the [documentation](http://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LogisticRegression.html#sklearn.linear_model.LogisticRegression).  One important parameter is how to penalize the weights (if it all) and how to balance the weight penalty vs the penalty for being inaccurate on the training data .  A weight penalty discourages high weights (usually a sign that the model is trying too hard to learn specific examples) but also increases the error rate.  The default penalty in sci-kit learn is the [L2](https://en.wikipedia.org/wiki/L2_norm) norm and the weight to this penalty is the *complexity* parameter (**C**).  Higher values of C favor reducing the error rate and allowing larger weights, while lower weights *regularize* the model to avoid too much variance.
 
 Instead of arbitrarily picking C, we can try out different values of C.  To do so, we can establish the set of parameter settings to consider:
 
@@ -201,7 +252,7 @@ Then, we use the grid-search feature to have scikit-learn try out each setting a
 
 ```python
 tune_clf = GridSearchCV(clf, parameters, cv=3)
-//This is code you had from before to train/test
+#This is code you had from before to train/test
 trainScore = tune_clf.score(X_train, y_train)
 print("Accuracy on training data: %.3f" % trainScore)
 testScore = tune_clf.score(X_test, y_test)
@@ -232,7 +283,7 @@ for train, test in outer_cv:
       ...
 ```
 
-The first two lines specify that we should divide the data up 5 times, and the for loop picks up the individual train/test splits that were created. The rest of the for loop which look familiar - it is also doing the tuning process from the previous section.  To use this function in your main code, modify your classifier call to be:
+The first two lines specify that we should divide the data up 5 times, and the for loop picks up the individual train/test splits that were created. The rest of the for loop should look familiar - it is also doing the tuning process from the previous section.  To use this function in your main code, modify your classifier call to be:
 
 ```python
 parameters = {"C": [.1, 1, 10, 100]}
