@@ -25,12 +25,15 @@ def runTuneTest(learner, parameters, X, y):
         clf = GridSearchCV(learner, parameters, cv=3)
         clf.fit(X_train, y_train)
         score = clf.score(X_test, y_test)
-        preds = clf.predict_proba(X_test)
-        try:
+        results.append(score)
+        #Use the code below instead if you want roc values
+        #preds = clf.predict_proba(X_test)
+        #results.append(roc_auc_score(y_test,preds[:,1]))
+        try: # works for random forests or logistic regression
             features.append(clf.best_estimator_.coef_[0,:])
         except:
             features.append(clf.best_estimator_.feature_importances_)
-        results.append(roc_auc_score(y_test,preds[:,1]))
+
     return results, features
 
 def getGeneRanks(weights):
